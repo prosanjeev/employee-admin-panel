@@ -66,14 +66,14 @@ const UpdateEmployee = ({ match }) => {
       );
       console.log("response",response);
       if (response.status === 200) {
-        toast.success("Employee updated successfully");
+        // toast.success("Employee updated successfully");
     } else {
         toast.error("Failed to update employee");
     }
-      navigate("/"); // Redirect to employees page after updating
+      navigate("/employees"); // Redirect to employees page after updating
     } catch (error) {
       console.error("Error updating employee:", error.response.data.message);
-      toast.error(error.response.data.message);
+      // toast.error(error.response.data.message);
     }
   };
 
@@ -154,6 +154,34 @@ const UpdateEmployee = ({ match }) => {
                                         onChange={() =>
                                           setFieldValue(list.name, option)
                                         }
+                                      />
+                                      <label htmlFor={option}>{option}</label>
+                                    </Box>
+                                  ))}
+                                </Stack>
+                              ): list.type === "checkbox" ? (
+                                <Stack direction="row">
+                                  {list.options.map((option) => (
+                                    <Box key={option}>
+                                      <input
+                                        type="checkbox"
+                                        id={option}
+                                        name={list.name}
+                                        value={option}
+                                        checked={values.course.includes(option)}
+                                        onChange={(e) => {
+                                          const option = e.target.value;
+                                          let newValue;
+                                          if (e.target.checked) {
+                                            // Add the course to the array if it's not already present
+                                            newValue = [...values.course, option];
+                                          } else {
+                                            // Remove the course from the array if it's present
+                                            newValue = values.course.filter((item) => item !== option);
+                                          }
+                                          // Set the new value for the course field
+                                          setFieldValue(list.name, newValue);
+                                        }}
                                       />
                                       <label htmlFor={option}>{option}</label>
                                     </Box>

@@ -30,7 +30,7 @@ export const employeeInformation = [
     {
       label: "Course",
       name: "course",
-      type: "radio",
+      type: "checkbox",
       options: ["MCA", "BCA", "BSC"],
     },
     {

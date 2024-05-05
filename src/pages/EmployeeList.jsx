@@ -40,7 +40,7 @@ const EmployeeList = () => {
   };
 
   return (
-    <Box w='95vw' mx='auto' mt={10} >
+    <Box w="95vw" mx="auto" mt={10}>
       <Flex justifyContent="space-between" alignItems="center" mb={4}>
         <Text>Total Count: {employees.length}</Text>
         <Link to="/create-employee">
@@ -67,13 +67,19 @@ const EmployeeList = () => {
         {employees.map((employee) => (
           <Flex key={employee.id} borderBottom="1px solid" py={2}>
             {/* <Box flex="0.5">{employee.id}</Box> */}
-            <Box flex="1"><Image h='80px' src={employee.profilePhoto} /></Box>
+            <Box flex="1">
+              <Image h="70px" src={employee.profilePhoto} />
+            </Box>
             <Box flex="1">{employee.fullName}</Box>
             <Box flex="1">{employee.email}</Box>
             <Box flex="1">{employee.phone}</Box>
             <Box flex="1">{employee.designation}</Box>
             <Box flex="1">{employee.gender}</Box>
-            <Box flex="1">{employee.course}</Box>
+            <Box flex="1">
+              {employee.course.map((course, index) => (
+                <Text key={index}>{course}</Text>
+              ))}
+            </Box>
             <Box flex="1">{formatDate(employee.createdAt)}</Box>
             <Box flex="1">
               <Link to={`/edit-employee/${employee._id}`}>

@@ -15,43 +15,38 @@ import {
 } from "@chakra-ui/react";
 import { MdKeyboardDoubleArrowRight } from "react-icons/md";
 import { Field, Form, Formik } from "formik";
-import { object, string, number } from "yup";
+import { object, string, number, array } from "yup";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const employeeValidationSchema = object({
-  name: string().required("Name is Required"),
+  fullName: string().required("Name is Required"),
   email: string().email().required("Email is Required"),
   phone: string()
     .required("Mobile No. is Required")
     .matches(/^[0-9]{10}$/, "Must be exactly 10 digits"),
   designation: string().required("Designation is Required"),
   gender: string().required("Gender is Required"),
-  course: string().required("Course is Required"),
+  course: array().min(1, "At least one course is required"),
 });
 
 const CreateEmployee = () => {
   const [employeePhoto, setEmployeePhoto] = useState("");
   const navigate = useNavigate();
   useEffect(() => {
-    console.log("employeePhoto",employeePhoto);
+    console.log("employeePhoto", employeePhoto);
   }, [employeePhoto]);
 
-
-
-  console.log()
-  function convertToBase64(e){
-    console.log(e);
+  function convertToBase64(e) {
     var reader = new FileReader();
     reader.readAsDataURL(e.target.files[0]);
     reader.onload = () => {
-        console.log(reader.result);
-        setEmployeePhoto(reader.result);
+      setEmployeePhoto(reader.result);
     };
-    reader.onerror = error =>{
-        console.log("Error", error)
-    }
+    reader.onerror = (error) => {
+      console.log("Error", error);
+    };
   }
 
   const employeeInformation = [
@@ -86,7 +81,7 @@ const CreateEmployee = () => {
     {
       label: "Course",
       name: "course",
-      type: "radio",
+      type: "checkbox",
       options: ["MCA", "BCA", "BSC"],
     },
     {
@@ -97,15 +92,16 @@ const CreateEmployee = () => {
   ];
 
   const onSubmit = async (values, actions) => {
-    console.log("Form Submitted with values:", values); // Add this line
-
     try {
-        values.profilePhoto=employeePhoto
-        console.log("vall",values)
+      // Convert course to an array of strings
+      values.course = Object.values(values.course).filter(Boolean);
+      values.profilePhoto = employeePhoto;
+      console.log("Form Values:", values);
       const response = await axios.post(
         "http://localhost:8080/api/v1/employee/create",
         values
       );
+      console.log("Response:", response);
       if (response.status === 201) {
         toast.success("Employee created successfully");
         actions.resetForm();
@@ -115,14 +111,17 @@ const CreateEmployee = () => {
       }
     } catch (error) {
       console.error("Error creating employee:", error);
-    //   toast.error("An error occurred while creating employee");
-      toast.error(error.response.data.message);
+      console.log("Error Response:", error.response);
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("An error occurred while creating the employee");
+      }
     }
   };
 
   return (
     <>
-      {/* Font import */}
       <Box title="Add Course">
         <Center>
           <Card
@@ -154,10 +153,10 @@ const CreateEmployee = () => {
                 phone: "",
                 designation: "",
                 gender: "",
-                course: "",
+                course: [],
                 profilePhoto: null,
               }}
-           
+              validationSchema={employeeValidationSchema}
               onSubmit={onSubmit}
             >
               {({ values, setFieldValue }) => (
@@ -205,6 +204,35 @@ const CreateEmployee = () => {
                                     </Box>
                                   ))}
                                 </Stack>
+                              ) : list.type === "checkbox" ? (
+                                <Stack direction="row">
+                                  {list.options.map((option) => (
+                                    <Box key={option}>
+                                      <input
+                                        type="checkbox"
+                                        id={option}
+                                        name={list.name}
+                                        value={option}
+                                        checked={values.course.includes(option)}
+                                        onChange={(e) => {
+                                          const option = e.target.value;
+                                          let newValue;
+                                          if (e.target.checked) {
+                                            // Add the course to the array if it's not already present
+                                            newValue = [...values.course, option];
+                                          } else {
+                                            // Remove the course from the array if it's present
+                                            newValue = values.course.filter((item) => item !== option);
+                                          }
+                                          // Set the new value for the course field
+                                          setFieldValue(list.name, newValue);
+                                        }}
+                                        
+                                      />
+                                      <label htmlFor={option}>{option}</label>
+                                    </Box>
+                                  ))}
+                                </Stack>
                               ) : (
                                 <>
                                   {list.name === "profilePhoto" ? (
@@ -212,7 +240,6 @@ const CreateEmployee = () => {
                                       type="file"
                                       accept="image/*"
                                       onChange={convertToBase64}
-                                    
                                     />
                                   ) : (
                                     <Input

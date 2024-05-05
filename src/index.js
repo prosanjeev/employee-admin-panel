@@ -21,9 +21,8 @@ root.render(
     <ChakraProvider>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-
-        </PersistGate>
         <App />
+        </PersistGate>
       </Provider>
     </ChakraProvider>
 
